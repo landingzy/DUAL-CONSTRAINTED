@@ -370,23 +370,7 @@ class TD3:
         random_probability = max(self.epsilon, 0.05)
 
 
-        with torch.no_grad():
-
-            if np.random.uniform() < random_probability and not self.is_test:
-                selected_action = np.random.uniform(1, 10)
-            else:
-                # multiplier_values = [x.item() if x is not None else 0 for x in self.log_multiplier]
-                multiplier_values = [x0.item(), x1.item()]
-                selected_action = min(multiplier_values)
-
-                selected_action = np.clip(
-                    selected_action, 0.5, 1
-                )
-                if np.isnan(selected_action):
-                    selected_action = 1
-
-
-                selected_action = np.clip(selected_action +action, 0.5, 1)
+       
 
         if not self.is_test:
 
@@ -398,24 +382,7 @@ class TD3:
         # print(selected_action)
         return selected_action
 
-    def update_multiplier(self, state: np.ndarray, p_t, v_t, rho):
-        roi_diff = torch.tensor(v_t - p_t, dtype=torch.float32, requires_grad=True).unsqueeze(0)
-        rbr = torch.tensor(rho - p_t, dtype=torch.float32, requires_grad=True).unsqueeze(0)
-
-        # 每隔一定批次进行更新
-        if (self.total_step // self.batch_size) % self.update_multiplier_every_n_batches == 0:
-
-            self.multiplier_optimizer.zero_grad()
-
-            multiplier_loss = torch.tensor(0.).to(self.device)
-
-            if self.log_multiplier[0] is not None:
-                multiplier_loss += (self.log_multiplier[0]) * torch.exp(-roi_diff.mean())
-            if self.log_multiplier[1] is not None:
-                multiplier_loss += (self.log_multiplier[1]) * torch.exp(- rbr.mean())  # Fixed typo here
-
-            multiplier_loss.backward()
-            self.multiplier_optimizer.step()
+    
 
     def store(self, reward, next_state, done):
         self.transition += [reward, next_state, done]

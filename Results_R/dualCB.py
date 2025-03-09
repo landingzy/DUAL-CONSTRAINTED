@@ -150,12 +150,11 @@ def bid(data, budget, **cfg):
         }
 
     data['bid_price'] = np.clip(np.multiply(data['pctr'], cfg['slot_bid_para']).astype(int), 0, 300)
-    # data['bid_price'] = np.clip(np.multiply(data['pctr'], cfg['slot_bid_para']).astype(int), 0, data['value'])
+   
 
-    # data['win'] = data.apply(
-    # lambda x: 1 if x['bid_price'] >= x['market_price'] else 0, axis=1)
     data['win'] = data.apply(
-        lambda x: 1 if x['bid_price'] >= x['market_price'] and x['value'] / x['market_price'] >= 1 else 0, axis=1)
+     lambda x: 1 if x['bid_price'] >= x['market_price'] else 0, axis=1)
+    
 
     win_data = data[data['win'] == 1]
 
@@ -321,8 +320,7 @@ def rtb(data, budget_para, RL, config, train=True):
                 day_value[-1] / day_spend[-1] if day_spend[-1] else 0,
             ]
 
-            RL.update_multiplier(state, p_slot, v_slot, day_budget[-1])
-            # RL.update_multiplier(state, p_slot, v_slot, slot_budget )
+           
 
             if train:
                 RL.store(slot_reward, next_state, done)

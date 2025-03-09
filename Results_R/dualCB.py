@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore")
 
 
 def choose_init_base_bid(config, budget_para):  #resultF_roi_1_fixcpc
-    base_bid_path = os.path.join('../lin_2/resultF_roi_1_fixcpc/ipinyou/{}/normal/test'.format(config['campaign_id']),
+    base_bid_path = os.path.join('../lin_2/result/ipinyou/{}/normal/test'.format(config['campaign_id']),
                                  'test_bid_log.csv')
     if not os.path.exists(base_bid_path):
         raise FileNotFoundError('Run LIN first before you train drlb')
@@ -58,30 +58,7 @@ def reward_func(reward_type, lin_result, rl_result):
     hb_pctrs = lin_result['win_pctr']
     hb_value = lin_result['value']
     fab_value = rl_result['value']
-    A = fab_pctrs / (hb_pctrs + 1e-3)
-    B = fab_cost / (hb_cost + 1e-3)
-
-    C = (fab_value / (1e-3 + fab_cost)) / (1e-3 + (hb_value / (1e-3 + hb_cost)))
-    if A >= 1 and B < 1:
-        if C >= 1:
-            W = 1.5 * A - 0.5 * B + 1.5 * C
-        else:
-            W = 1.5 * A - 0.5 * B - 0.5 * C
-    elif A >= 1 and B >= 1:
-        if C >= 1:
-            W = 1 * A - 1 * B + 1.5 * C
-        else:
-            W = 1 * A - 1 * B - 0.5 * C
-    elif A < 1 and B >= 1:
-        if C >= 1:
-            W = 0.5 * A - 1.5 * B + 1.5 * C
-        else:
-            W = 0.5 * A - 1.5 * B - 0.5 * C
-    else:
-        if C >= 1:
-            W = 1.2 * A - 0.8 * B + 1.5 * C
-        else:
-            W = 1.2 * A - 0.8 * B - 0.5 * C
+   
 
     if fab_clks >= hb_clks and fab_cost < hb_cost:
         r = 5
@@ -92,14 +69,7 @@ def reward_func(reward_type, lin_result, rl_result):
     else:
         r = -2.5
 
-    if fab_clks >= hb_clks and fab_cost < hb_cost:
-        z = 1.5 * A - B
-    elif fab_clks >= hb_clks and fab_cost >= hb_cost:
-        z = A - B
-    elif fab_clks < hb_clks and fab_cost >= hb_cost:
-        z = 0.5 * A - 1.5 * B
-    else:
-        z = 1.2 * A - 0.8 * B
+   
 
     if reward_type == 'op':
         return r / 1000
@@ -109,12 +79,7 @@ def reward_func(reward_type, lin_result, rl_result):
         return fab_clks / 1000
     elif reward_type == 'pctr':
         return fab_pctrs
-    elif reward_type == 'value':
-        return fab_value
-    elif reward_type == 'adapt':
-        return W
-    elif reward_type == 'z':
-        return z
+   
 
     else:
         return fab_clks

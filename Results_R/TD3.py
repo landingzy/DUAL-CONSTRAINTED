@@ -346,28 +346,28 @@ class TD3:
 
         self.is_test = False
 
-    def select_action(self, state: np.ndarray):
-        """Select an action from the input state."""
-        # epsilon greedy policy
-        self.actor.eval()
-        if self.total_step < self.initial_random_steps and not self.is_test:
-            action = np.random.uniform(-0.99, 0.99)
-        else:
-            action = (
-                self.actor(torch.unsqueeze(torch.as_tensor(state, dtype=torch.float32).to(self.device), dim=0))[0]
-                .detach().cpu().numpy()
-            )
+    # def select_action(self, state: np.ndarray):
+    #     """Select an action from the input state."""
+    #     # epsilon greedy policy
+    #     self.actor.eval()
+    #     if self.total_step < self.initial_random_steps and not self.is_test:
+    #         action = np.random.uniform(-0.99, 0.99)
+    #     else:
+    #         action = (
+    #             self.actor(torch.unsqueeze(torch.as_tensor(state, dtype=torch.float32).to(self.device), dim=0))[0]
+    #             .detach().cpu().numpy()
+    #         )
 
-        # add noise for exploration during training
-        if not self.is_test:
-            noise = self.exploration_noise.sample()
-            action = np.clip(
-                action + noise, -0.99, 0.99
-            )
+    #     # add noise for exploration during training
+    #     if not self.is_test:
+    #         noise = self.exploration_noise.sample()
+    #         action = np.clip(
+    #             action + noise, -0.99, 0.99
+    #         )
 
-        self.transition = [state, action]
-        torch.cuda.empty_cache()
-        random_probability = max(self.epsilon, 0.05)
+    #     self.transition = [state, action]
+    #     torch.cuda.empty_cache()
+    #     random_probability = max(self.epsilon, 0.05)
 
 
        
